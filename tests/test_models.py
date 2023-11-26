@@ -214,6 +214,18 @@ class TestProductModel(unittest.TestCase):
         for product in found:
             self.assertEqual(product.price, price)
 
+    def test_find_by_price_string(self):
+        """It should find products by price even if price is given as a string"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        price = products[0].price
+        count = len([product for product in products if product.price == price])
+        found = Product.find_by_price(str(price))
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.price, price)
+
     def test_product_serialization(self):
         """It should serialize product"""
         product = ProductFactory()
@@ -262,3 +274,8 @@ class TestProductModel(unittest.TestCase):
             "price": 120.6,
             "available": True,
             "extra": "extra"})
+
+    def test_deserialize_product_invalid_data(self):
+        """It should raise an exception if there is an attribute not provided"""
+        product = Product()
+        self.assertRaises(DataValidationError, product.deserialize, data="")
